@@ -150,6 +150,39 @@
 
 ---
 
+### 7. [Tag（标签）- 资源组织与分类](./TAG_GUIDE.md)
+**核心价值**: 灵活组织、分类和关联所有资源，实现精准作用域控制
+
+- Tag 是什么？组织资源的"万能胶水"
+- 核心结构：ID、Name、Creation UTC
+- 系统标签：`__preamble__`、`agent:{id}`、`journey:{id}`、`guideline:{id}`
+- 自定义标签：客户分层、功能开关、地区语言、A/B 测试
+- Entity Queries：按标签加载资源的智能机制
+- 与所有实体的关系：Agent、Guideline、Capability、Glossary、Context Variable、Journey、Customer、Canned Response
+
+**关键特性**:
+- 多维度分类（同一资源可有多个标签）
+- 扁平结构（通过命名约定模拟层级）
+- 动态加载（运行时按标签组合资源）
+- 跨实体使用（所有主要实体支持）
+
+**企业价值**:
+- 多租户支持（组织隔离、资源隔离）
+- 客户细分（VIP、企业、试用）
+- 功能开关和渐进式发布
+- A/B 测试和实验
+- 权限控制（敏感资源保护）
+
+**实际应用场景**:
+- 客户分层（VIP 专属服务、企业客户专属）
+- 多 Agent 环境（销售 Agent vs 支持 Agent）
+- A/B 测试（不同话术对比）
+- 地区和语言本地化
+- 功能开关（Beta 测试、渐进式发布）
+- Preamble Messages（对话开场白）
+
+---
+
 ## 🎯 核心概念关系图
 
 ```
@@ -166,28 +199,32 @@
 │  │    ├─ Condition: "客户询问价格"                      │   │
 │  │    ├─ Action: "提供价格信息"                         │   │
 │  │    ├─ Tools: [get_price]                            │   │
-│  │    └─ Composition Mode: CANNED_STRICT               │   │
+│  │    ├─ Composition Mode: CANNED_STRICT               │   │
+│  │    └─ Tags: [vip, sales]                            │   │
 │  └─────────────────────────────────────────────────────┘   │
 │         ↓ 引用                                              │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  Canned Response (预设回复)                          │   │
 │  │    ├─ Template: "价格是 ¥{{price}}"                  │   │
 │  │    ├─ Signals: ["价格", "多少钱"]                    │   │
-│  │    └─ Fields: [price]                               │   │
+│  │    ├─ Fields: [price]                               │   │
+│  │    └─ Tags: [agent:agent_123]                       │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  Capability (能力)                                   │   │
 │  │    ├─ Title: "查询余额"                              │   │
 │  │    ├─ Description: "为客户提供账户余额信息"           │   │
-│  │    └─ Signals: ["余额", "账户", "钱"]                │   │
+│  │    ├─ Signals: ["余额", "账户", "钱"]                │   │
+│  │    └─ Tags: [sales, premium-services]               │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
 │  │  Glossary/Term (术语)                                │   │
 │  │    ├─ Name: "APR"                                   │   │
 │  │    ├─ Description: "年化利率..."                     │   │
-│  │    └─ Synonyms: ["年利率", "综合利率"]               │   │
+│  │    ├─ Synonyms: ["年利率", "综合利率"]               │   │
+│  │    └─ Tags: [region-cn]                             │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                                                             │
 │  ┌─────────────────────────────────────────────────────┐   │
@@ -195,14 +232,25 @@
 │  │    ├─ Name: "AccountBalance"                        │   │
 │  │    ├─ Value: {"balance": 5000.50, "currency": "USD"}│   │
 │  │    ├─ Tool: fetch_balance (自动刷新)                │   │
-│  │    └─ Freshness: "0 */6 * * *" (每 6 小时)          │   │
+│  │    ├─ Freshness: "0 */6 * * *" (每 6 小时)          │   │
+│  │    └─ Tags: [vip-customer]                          │   │
+│  └─────────────────────────────────────────────────────┘   │
+│                                                             │
+│  ┌─────────────────────────────────────────────────────┐   │
+│  │  Tag (标签) - 资源组织核心                           │   │
+│  │    ├─ 系统标签: __preamble__, agent:{id}            │   │
+│  │    ├─ 客户分层: vip, enterprise, trial              │   │
+│  │    ├─ 功能开关: feature-new-ui                      │   │
+│  │    ├─ 地区语言: region-cn, lang-zh                  │   │
+│  │    └─ A/B 测试: exp-a, exp-b                        │   │
 │  └─────────────────────────────────────────────────────┘   │
 │                                                             │
 │  核心机制：                                                  │
 │  • 语义匹配（Vector Embeddings）                            │
-│  • 动态加载（根据上下文）                                     │
+│  • 动态加载（根据 Tags + 上下文）                            │
 │  • 层次化配置（Agent → Journey → Guideline）                │
 │  • 自动数据刷新（Context Variables + Tools）                │
+│  • 标签过滤（Entity Queries 按标签加载资源）                 │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -217,6 +265,8 @@
 | **Capability** | 能力声明 | 描述"能做什么" | 语义匹配 Signals | Agent/全局 |
 | **Glossary** | 术语定义 | 确保术语一致性 | 语义匹配内容 | Agent/全局 |
 | **Canned Response** | 预设模板 | 提供标准回复 | 语义匹配草稿 | Guideline 关联 |
+| **Context Variable** | 动态数据 | 存储客户特定数据 | 基于标签加载 | Agent/标签/全局 |
+| **Tag** | 组织分类 | 资源关联与作用域控制 | 精确匹配标签 | 所有实体 |
 
 ---
 
@@ -403,6 +453,8 @@ async with self._lock.reader_lock:
 | **Glossary** | `src/parlant/core/glossary.py:46-66` | `src/parlant/core/engines/alpha/engine.py:1718-1751` |
 | **Canned Response** | `src/parlant/core/canned_responses.py:63-99` | `src/parlant/core/engines/alpha/canned_response_generator.py` |
 | **Composition Mode** | `src/parlant/core/agents.py:48-52` | `src/parlant/core/engines/alpha/canned_response_generator.py:579-612` |
+| **Context Variable** | `src/parlant/core/context_variables.py:46-79` | `src/parlant/core/entity_cq.py:209-229` |
+| **Tag** | `src/parlant/core/tags.py:36-94` | `src/parlant/core/entity_cq.py:68-110` |
 
 ---
 
