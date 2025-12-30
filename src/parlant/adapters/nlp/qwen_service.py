@@ -86,7 +86,7 @@ class QwenEmbedder(BaseEmbedder):
 
         self._client = AsyncClient(
             base_url=os.environ.get(
-                "BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+                "BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"
             ),
             api_key=os.environ.get("DASHSCOPE_API_KEY", ""),
         )
@@ -169,7 +169,7 @@ class QwenSchematicGenerator(BaseSchematicGenerator[T]):
 
         self._client = AsyncClient(
             base_url=os.environ.get(
-                "BASE_URL", "https://dashscope-intl.aliyuncs.com/compatible-mode/v1"
+                "BASE_URL", "https://dashscope.aliyuncs.com/compatible-mode/v1"
             ),
             api_key=os.environ["DASHSCOPE_API_KEY"],
         )
