@@ -1,4 +1,4 @@
-# Copyright 2025 Emcie Co Ltd.
+# Copyright 2026 Emcie Co Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -511,6 +511,11 @@ def availability_check() -> ToolResult:
 
 def check_customer_location() -> ToolResult:
     return ToolResult(data="Spain!!")
+
+
+def schedule_appointment_2(date: datetime) -> ToolResult:
+    # Simulate scheduling the appointment
+    return ToolResult(data=f"Appointment scheduled for {date}")
 
 
 def check_eligibility(account_id: int, amount: int) -> ToolResult:

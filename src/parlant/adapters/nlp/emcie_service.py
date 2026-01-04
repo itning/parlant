@@ -1,4 +1,4 @@
-# Copyright 2025 Emcie Co Ltd.
+# Copyright 2026 Emcie Co Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -142,9 +142,7 @@ class EmcieSchematicGenerator(BaseSchematicGenerator[T]):
             props = prompt.props
             prompt = prompt.build()
         else:
-            raise ValueError(
-                f"Schema {self.schema.__name__} failed to pass PromptBuilder input, passed {type(prompt)} instead"
-            )
+            props = {}
 
         try:
             t_start = time.time()

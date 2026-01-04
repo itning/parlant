@@ -1,4 +1,4 @@
-# Copyright 2025 Emcie Co Ltd.
+# Copyright 2026 Emcie Co Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -314,7 +314,7 @@ class GenericGuidelineMatchingStrategy(GuidelineMatchingStrategy):
     ) -> Sequence[GuidelineMatchingBatch]:
         journeys = list(
             chain.from_iterable(
-                self._entity_queries.find_journeys_on_which_this_guideline_depends.get(g.id, [])
+                self._entity_queries.guideline_and_journeys_it_depends_on.get(g.id, [])
                 for g in guidelines
             )
         )
@@ -376,7 +376,7 @@ class GenericGuidelineMatchingStrategy(GuidelineMatchingStrategy):
     ) -> Sequence[GuidelineMatchingBatch]:
         journeys = list(
             chain.from_iterable(
-                self._entity_queries.find_journeys_on_which_this_guideline_depends.get(g.id, [])
+                self._entity_queries.guideline_and_journeys_it_depends_on.get(g.id, [])
                 for g in guidelines
             )
         )
@@ -438,7 +438,7 @@ class GenericGuidelineMatchingStrategy(GuidelineMatchingStrategy):
     ) -> Sequence[GuidelineMatchingBatch]:
         journeys = list(
             chain.from_iterable(
-                self._entity_queries.find_journeys_on_which_this_guideline_depends.get(g.id, [])
+                self._entity_queries.guideline_and_journeys_it_depends_on.get(g.id, [])
                 for g in guidelines
             )
         )
@@ -501,7 +501,7 @@ class GenericGuidelineMatchingStrategy(GuidelineMatchingStrategy):
     ) -> Sequence[GuidelineMatchingBatch]:
         journeys = list(
             chain.from_iterable(
-                self._entity_queries.find_journeys_on_which_this_guideline_depends.get(g.id, [])
+                self._entity_queries.guideline_and_journeys_it_depends_on.get(g.id, [])
                 for g in guidelines
             )
         )
@@ -582,7 +582,7 @@ class GenericGuidelineMatchingStrategy(GuidelineMatchingStrategy):
     ) -> GenericDisambiguationGuidelineMatchingBatch:
         journeys = list(
             chain.from_iterable(
-                self._entity_queries.find_journeys_on_which_this_guideline_depends.get(g.id, [])
+                self._entity_queries.guideline_and_journeys_it_depends_on.get(g.id, [])
                 for g in [disambiguation_guideline, *disambiguation_targets]
             )
         )

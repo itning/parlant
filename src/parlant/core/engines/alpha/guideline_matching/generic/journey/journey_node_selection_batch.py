@@ -189,9 +189,8 @@ class GenericJourneyNodeSelectionBatch(GuidelineMatchingBatch):
 
     @override
     async def process(self) -> GuidelineMatchingBatchResult:
-        automatic_match = self.auto_return_match()
-        if automatic_match:
-            return automatic_match  # TODO fix this
+        if automatic_match := self.auto_return_match():
+            return automatic_match
 
         journey_conditions = list(
             await async_utils.safe_gather(
@@ -283,40 +282,15 @@ class GenericJourneyNodeSelectionBatch(GuidelineMatchingBatch):
                     journey_path=self._previous_path,
                     journey_conditions=journey_conditions,
                 )
-                next_step_selector = JourneyNextStepSelection(
-                    logger=self._logger,
-                    guideline_store=self._guideline_store,
-                    optimization_policy=self._optimization_policy,
-                    schematic_generator=self._schematic_generator_next_step_selection,
-                    examined_journey=self._examined_journey,
-                    context=self._context,
-                    node_guidelines=self._node_guidelines,
-                    journey_path=self._previous_path,
-                    journey_conditions=journey_conditions,
-                )
 
-                backtrack_task = asyncio.create_task(backtrack_checker.process())
-                next_step_task = asyncio.create_task(next_step_selector.process())
-
-                backtrack_result = await backtrack_task
+                backtrack_result = await backtrack_checker.process()
 
                 if not backtrack_result.requires_backtracking:
-                    next_step_task.cancel()
-                    try:
-                        await next_step_task
-                    except asyncio.CancelledError:
-                        pass
                     return GuidelineMatchingBatchResult(
                         matches=[], generation_info=backtrack_result.generation_info
                     )
                 else:
                     if backtrack_result.backtrack_to_same_journey_process:
-                        next_step_task.cancel()
-                        try:
-                            await next_step_task
-                        except asyncio.CancelledError:
-                            pass
-
                         node_selector = JourneyBacktrackNodeSelection(
                             logger=self._logger,
                             guideline_store=self._guideline_store,
@@ -330,4 +304,15 @@ class GenericJourneyNodeSelectionBatch(GuidelineMatchingBatch):
                         )
                         return await node_selector.process()
                     else:
-                        return await next_step_task
+                        next_step_selector = JourneyNextStepSelection(
+                            logger=self._logger,
+                            guideline_store=self._guideline_store,
+                            optimization_policy=self._optimization_policy,
+                            schematic_generator=self._schematic_generator_next_step_selection,
+                            examined_journey=self._examined_journey,
+                            context=self._context,
+                            node_guidelines=self._node_guidelines,
+                            journey_path=self._previous_path,
+                            journey_conditions=journey_conditions,
+                        )
+                        return await next_step_selector.process()

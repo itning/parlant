@@ -1,4 +1,4 @@
-# Copyright 2025 Emcie Co Ltd.
+# Copyright 2026 Emcie Co Ltd.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -911,6 +911,18 @@ TOOLS: dict[str, dict[str, Any]] = {
             },
         },
         "required": ["card_number", "reason"],
+    },
+    "schedule_appointment_2": {
+        "name": "schedule_appointment_2",
+        "description": "Schedule an appointment",
+        "module_path": "tests.tool_utilities",
+        "parameters": {
+            "date": {
+                "type": "datetime",
+                "description": "The date of the appointment",
+            },
+        },
+        "required": ["date"],
     },
 }
 
